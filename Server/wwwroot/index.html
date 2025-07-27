@@ -1,0 +1,79 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title></title>
+</head>
+<body>
+    <label>UserId:</label>
+    <input type="text" id="userId" value="u1" />
+    <button onclick="connect()">Connect</button>
+    <hr />
+    <button onclick="connection?.invoke('ProxyToUser', message.value, userId.value)">ProxyToUser</button>
+
+    <hr />
+
+    <label>Message:</label>
+    <input type="text" id="message" value="s1" />
+    <br>
+    <label>Methods:</label>
+    <button onclick="connection?.invoke('ProxyToAll', message.value)">ProxyToAll</button>
+    <button onclick="connection?.invoke('ProxyToCaller', message.value)">ProxyToCaller</button>
+    <button onclick="connection?.invoke('ProxyToOthers', message.value)">ProxyToOthers</button>
+
+    <hr />
+
+    <label>ClientId:</label>
+    <input type="text" id="clientId" value="" />
+    <br>
+    <button onclick="connection?.invoke('ProxyToClient', message.value, clientId.value)">ProxyToClient</button>
+
+    <hr />
+
+    <label>GroupName:</label>
+    <input id="group" value="g1" />
+    <br>
+
+    <button onclick="join()">Join Group</button>
+    <button onclick="leave()">Leave Group</button>
+    <br>
+    <label>Methods:</label>
+    <br>
+    <button onclick="connection?.invoke('ProxyToGroups', message.value, group.value)">ProxyToGroups</button>
+    <button onclick="connection?.invoke('ProxyToOthersInGroup', message.value, group.value)">ProxyToOthersInGroup</button>
+
+    <!-- 
+        libman:
+        provider: cdnjs
+        microsoft-signalr
+    -->
+    <script src="/microsoft-signalr/signalr.min.js"></script>
+    <script>
+        let connection;
+
+        function connect() {
+            connection = new signalR.HubConnectionBuilder()
+                .withUrl(`/hub?userId=${userId.value}`)
+                .build();
+
+            connection.on("serverSend", // Register an event listener for server (Hub) calls: .SendAsync(eventName, arguments)
+                console.log
+            );
+
+            connection.start() // Establishes a WebSocket connection to the SignalR server (falls back to SSE/long polling automatically)
+                .then(() => console.log("✅ Connected"));
+        }
+
+        function join() {
+            connection.invoke("JoinGroup", group.value);
+            console.log("Join Group: ", group.value);
+        }
+
+        function leave() {
+            connection.invoke("LeaveGroup", group.value);
+            console.log("Leave Group: ", group.value);
+        }
+
+    </script>
+</body>
+</html>
